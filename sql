@@ -1,3 +1,28 @@
+##Jupyter#######################
+python -m venv env
+source env/bin/activate          # Windows: env\Scripts\activate
+pip install jupyterlab duckdb duckdb-engine geopandas pyrosm ipython-sql
+
+###Notebook set up ####################
+# notebook 00_setup.ipynb
+%load_ext sql
+%sql duckdb:///airbnb_demo.duckdb
+
+# enable spatial functions once
+%%sql
+INSTALL spatial; LOAD spatial;
+
+### lOAD A csv in ONE LINE AND RUN A QUERY##################
+
+%%sql
+CREATE TABLE listings AS
+SELECT * FROM read_csv_auto('listings.csv', header=TRUE);
+
+SELECT listing_id, COUNT(*) 
+FROM listings 
+GROUP BY 1 
+LIMIT 5;
+
 ##Average vacant stays: #########################################
 
 WITH listing_vacancies AS (
@@ -67,7 +92,7 @@ WITH total_views AS (
     FROM
         listing_views
     WHERE
-        DATE_TRUNC('month', visit_date) = '2022-07-01'
+        DATE(visit_date) BETWEEN '2022‑07‑01' AND '2022‑07‑31'
     GROUP BY 
         listing_id
 ),
@@ -78,7 +103,7 @@ total_bookings AS (
     FROM
         bookings
     WHERE
-        DATE_TRUNC('month', booking_date) = '2022-07-01'
+        DATE(visit_date) BETWEEN '2022‑07‑01' AND '2022‑07‑31'
     GROUP BY 
         listing_id
 )
